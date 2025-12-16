@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday Savita Rani</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Lato:wght@300;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #d4af37;
+    --rose: #e6c8c8;
+    --bg-deep: #1a0b0b;
+    --glass: rgba(40, 20, 20, 0.85);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: radial-gradient(circle at center, #2e1414, #000000);
+    color: var(--rose);
+    font-family: 'Lato', sans-serif;
+    overflow: hidden; 
+    outline: none; 
+  }
+
+  #sparkle-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 999;
+  }
+
+  section {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    position: relative; padding: 20px;
+    box-sizing: border-box;
+    scroll-snap-align: start; 
+  }
+
+  /* --- HERO --- */
+  #hero svg {
+    width: 95%; max-width: 1300px; height: auto;
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+  }
+
+  .text-path {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 110px;
+    font-weight: 700;
+    fill: transparent;
+    stroke: var(--gold);
+    stroke-width: 2;
+    stroke-dasharray: 4000;
+    stroke-dashoffset: 4000;
+    transform-origin: center;
+  }
+
+  .animate-hero {
+    animation:
+      draw 2s ease-in-out forwards,
+      fastZoom 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1.8s,
+      glowFill 0.5s ease-out forwards 2.5s;
+  }
+
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fastZoom {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.25); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
+  @keyframes glowFill { to { fill: var(--gold); filter: drop-shadow(0 0 30px var(--gold)); } }
+  
+  .sub-hero {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; color: white; margin-top: -20px;
+    opacity: 0; animation: fadeUp 1s ease forwards 3s;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(-10px); } }
+
+  /* --- MORPHING GALLERY --- */
+  .gallery-container {
+    width: 350px; height: 550px; position: relative;
+    border: 8px solid var(--gold); border-radius: 4px;
+    overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    background: #000;
+  }
+  
+  .slide {
+    position: absolute; width: 100%; height: 100%;
+    opacity: 0; 
+    transform: scale(1);
+    /* Morphing Transition Logic */
+    transition: opacity 0.8s ease-in-out, transform 3s ease-out; 
+    background-size: cover; background-position: center;
+    will-change: opacity, transform;
+  }
+  
+  /* Active slide fades in and slowly zooms (morphs) */
+  .slide.active { 
+    opacity: 1; 
+    transform: scale(1.05); /* Slight zoom for motion */
+  }
+
+  /* --- CARDS & TEXT --- */
+  .card-container {
+    width: 80%; max-width: 700px; background: var(--glass);
+    padding: 40px; border: 1px solid var(--gold); border-radius: 12px;
+    text-align: center; transform: translateY(50px); opacity: 0;
+    transition: all 1s ease;
+  }
+  .card-container.visible { transform: translateY(0); opacity: 1; }
+
+  h2 {
+    font-family: 'Playfair Display', serif; font-size: 3rem;
+    color: var(--gold); margin-bottom: 30px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 15px;
+  }
+
+  .quality-row { margin-bottom: 25px; text-align: left; }
+  .quality-label { font-size: 1.3rem; margin-bottom: 5px; color: white; }
+  .bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; }
+  .bar-fill {
+    height: 100%; width: 0%; background: var(--gold);
+    border-radius: 3px; box-shadow: 0 0 10px var(--gold);
+    transition: width 1.5s ease-out;
+  }
+
+  .message-box {
+    font-family: 'Playfair Display', serif; font-size: 2.2rem;
+    line-height: 1.6; text-align: center; max-width: 800px; color: #fff;
+    opacity: 0; transform: scale(0.9); transition: all 1s ease;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+  }
+  .message-box.visible { opacity: 1; transform: scale(1); }
+  .signature { margin-top: 30px; font-size: 1.5rem; color: var(--gold); font-style: italic; }
+
+  /* --- UI ELEMENTS --- */
+  #scroll-hint {
+    position: absolute; bottom: 20px;
+    color: rgba(255,255,255,0.8); font-size: 16px; letter-spacing: 2px;
+    opacity: 0; transition: opacity 1s;
+  }
+  .hint-visible { opacity: 1 !important; animation: float 2s infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+  
+  #start-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; z-index: 2000;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    color: var(--gold); font-family: 'Playfair Display'; font-size: 2rem;
+    cursor: pointer;
+  }
+  
+  #controls-hint {
+    position: fixed; bottom: 10px; right: 20px; z-index: 100;
+    color: rgba(255,255,255,0.3); font-size: 12px;
+    display: none; 
+  }
+
+  #music-btn {
+    position: fixed; top: 20px; right: 20px; z-index: 2001;
+    background: rgba(0,0,0,0.5); color: var(--gold);
+    border: 1px solid var(--gold); padding: 10px 20px;
+    cursor: pointer; border-radius: 20px; font-family: sans-serif;
+    display: none; 
+  }
+</style>
+</head>
+<body id="main-body" tabindex="0">
+
+<div id="start-overlay">
+    <div>Press OK or Enter to Begin</div>
+    <div style="font-size: 1rem; color: #888; margin-top: 10px;">(Music Box Edition)</div>
+</div>
+
+<button id="music-btn" onclick="toggleMusic()">🔊 Music: ON</button>
+<div id="controls-hint">Use Remote Arrows to Navigate</div>
+<canvas id="sparkle-canvas"></canvas>
+
+<!-- SECTIONS -->
+<section id="hero" class="tv-section">
+  <svg viewBox="0 0 1400 300">
+    <text x="50%" y="65%" text-anchor="middle" id="birthdayText" class="text-path">Happy Birthday</text>
+  </svg>
+  <div class="sub-hero">Savita Rani</div>
+  <div id="scroll-hint">▼ SCROLL DOWN ▼</div>
+</section>
+
+<section id="gallery" class="tv-section">
+  <h2>Beautiful Memories</h2>
+  <div class="gallery-container" id="slideshow"></div>
+</section>
+
+<section id="qualities" class="tv-section">
+  <div class="card-container">
+    <h2>Super Mom Stats</h2>
+    <div class="quality-row">
+      <div class="quality-label">Pure Heart</div>
+      <div class="bar-bg"><div class="bar-fill" data-width="100%"></div></div>
+    </div>
+    <div class="quality-row">
+      <div class="quality-label">Master Chef Skills</div>
+      <div class="bar-bg"><div class="bar-fill" data-width="100%"></div></div>
+    </div>
+    <div class="quality-row">
+      <div class="quality-label">Infinite Love</div>
+      <div class="bar-bg"><div class="bar-fill" data-width="100%"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="message" class="tv-section">
+  <div class="message-box">
+    <p>"To the woman who does it all. Thank you for every sacrifice, every lesson, and every hug. You make our house a home."</p>
+    <div class="signature">- With Love</div>
+  </div>
+</section>
+
+<script>
+  // --- 1. SETUP ---
+  if (history.scrollRestoration) { history.scrollRestoration = 'manual'; }
+  window.onbeforeunload = function () { window.scrollTo(0, 0); }
+  window.onload = function() { window.scrollTo(0, 0); }
+  document.body.style.overflow = 'hidden';
+
+  let hasStarted = false;
+  let canScroll = false;
+  let currentSectionIndex = 0;
+  const sections = document.querySelectorAll('.tv-section');
+
+  // --- 2. MUSIC BOX ---
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let nextNoteTime = 0;
+  let isPlaying = false;
+  let noteIndex = 0;
+  let timerID = null;
+
+  const tune = [
+    {n:'G4',d:0.5}, {n:'G4',d:0.5}, {n:'A4',d:1}, {n:'G4',d:1}, {n:'C5',d:1}, {n:'B4',d:2},
+    {n:'G4',d:0.5}, {n:'G4',d:0.5}, {n:'A4',d:1}, {n:'G4',d:1}, {n:'D5',d:1}, {n:'C5',d:2},
+    {n:'G4',d:0.5}, {n:'G4',d:0.5}, {n:'G5',d:1}, {n:'E5',d:1}, {n:'C5',d:1}, {n:'B4',d:1}, {n:'A4',d:2},
+    {n:'F5',d:0.5}, {n:'F5',d:0.5}, {n:'E5',d:1}, {n:'C5',d:1}, {n:'D5',d:1}, {n:'C5',d:2}
+  ];
+  const freqs = {
+    'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25, 'D5': 587.33,
+    'E5': 659.25, 'F5': 698.46, 'G5': 783.99
+  };
+
+  function playNote(note, time) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freqs[note.n];
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(time);
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(0.3, time + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 1.5);
+    osc.stop(time + 1.5);
+  }
+
+  function scheduler() {
+    while (nextNoteTime < audioCtx.currentTime + 0.1) {
+      if(isPlaying) {
+          playNote(tune[noteIndex], nextNoteTime);
+          nextNoteTime += tune[noteIndex].d * 0.6; 
+          noteIndex++;
+          if (noteIndex >= tune.length) {
+            noteIndex = 0; nextNoteTime += 1.5; 
+          }
+      } else { break; }
+    }
+    if(isPlaying) timerID = requestAnimationFrame(scheduler);
+  }
+
+  function startMusic() {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    isPlaying = true;
+    nextNoteTime = audioCtx.currentTime + 0.5;
+    scheduler();
+    document.getElementById('music-btn').style.display = 'block';
+  }
+
+  function toggleMusic() {
+    isPlaying = !isPlaying;
+    const btn = document.getElementById('music-btn');
+    if(isPlaying) {
+        nextNoteTime = audioCtx.currentTime;
+        scheduler();
+        btn.innerText = "🔊 Music: ON";
+    } else {
+        cancelAnimationFrame(timerID);
+        btn.innerText = "🔇 Music: OFF";
+    }
+  }
+
+  // --- 3. MORPHING SLIDESHOW ---
+  const photoList = [
+    "https://lh3.googleusercontent.com/pw/AP1GczOEA-kp8_HpNUUkHgTfsCqwR8Zf35tUXQ6S-XFJ7wLaqLFNiRRS9wuPhNOs5FqLCkowSZxWmaspI7jtxLvEss2LRLlny3WKAIgWLXiEnP_f29_mcJ-wUwDuDnUJtQCO4SuSTwMugDHRDElWjd8gx4e4EA=w717-h956-s-no-gm?authuser=0", 
+    "https://lh3.googleusercontent.com/pw/AP1GczNy8g2k2JdUerM8jlFLPiR8jXSTD13RgZ9VMcmXyUvM86dJITvly6S5PV34UOrdKwkAcUCe2phbGzvJmiqxZmYF7IcwXUMoaAS5zCuxCrfNZIcHUo5Z9yOEtjfWGe89YfCnhaxCwzDpoWjjxJC-bbUPvA=w717-h956-s-no-gm?authuser=0", 
+    "https://lh3.googleusercontent.com/pw/AP1GczO-OTuq3fzG28VDPlOvcX5Ta14-PUmq2oaUwLxdeZ4nVoMQALdQSUeLG1d1Wu0PGCvEQ8f4RsPTjrEm9_ikbyP_SfJ2zOmSzlrxy5OyoM6Setp7QFghfmK69Cg2yHgI2HYXpg9-ptYu5ufcWEU1m0gMbw=w717-h956-s-no-gm?authuser=0"
+  ];
+  const slideshow = document.getElementById('slideshow');
+  photoList.forEach((url, i) => {
+    const div = document.createElement('div');
+    div.className = `slide ${i===0?'active':''}`;
+    div.style.backgroundImage = `url('${url}')`;
+    slideshow.appendChild(div);
+  });
+  
+  let currentSlide = 0;
+  let autoSlide = setInterval(nextSlide, 3000); // 3 seconds per photo
+
+  function nextSlide() {
+    const slides = document.querySelectorAll('.slide');
+    // Remove active class to start fade out
+    slides[currentSlide].classList.remove('active');
+    
+    // Calculate next
+    currentSlide = (currentSlide + 1) % slides.length;
+    
+    // Add active class to start fade in & zoom
+    slides[currentSlide].classList.add('active');
+  }
+
+  function prevSlide() {
+    const slides = document.querySelectorAll('.slide');
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+  }
+
+  // --- 4. START SEQUENCE ---
+  function startExperience() {
+      if(hasStarted) return;
+      hasStarted = true;
+      
+      document.getElementById('start-overlay').style.display='none';
+      document.getElementById('main-body').focus();
+      document.getElementById('controls-hint').style.display='block';
+      
+      startMusic();
+      
+      const t = document.getElementById('birthdayText');
+      t.classList.add('animate-hero');
+      
+      setTimeout(() => {
+          canScroll = true;
+          document.body.style.overflow = 'hidden'; 
+          document.getElementById('scroll-hint').classList.add('hint-visible');
+      }, 4500);
+  }
+  
+  document.getElementById('start-overlay').addEventListener('click', startExperience);
+
+  // --- 5. KEYBOARD LOGIC ---
+  document.addEventListener('keydown', (e) => {
+    if (!hasStarted) {
+        if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13) {
+            startExperience();
+        }
+        return;
+    }
+    if (e.key === 'm' || e.key === 'M') { toggleMusic(); }
+
+    if (canScroll) {
+        if (e.key === 'ArrowDown' || e.keyCode === 40) {
+            e.preventDefault();
+            if (currentSectionIndex < sections.length - 1) {
+                currentSectionIndex++;
+                sections[currentSectionIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        if (e.key === 'ArrowUp' || e.keyCode === 38) {
+            e.preventDefault();
+            if (currentSectionIndex > 0) {
+                currentSectionIndex--;
+                sections[currentSectionIndex].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }
+    if (e.key === 'ArrowRight' || e.keyCode === 39) {
+        clearInterval(autoSlide); nextSlide();
+    }
+    if (e.key === 'ArrowLeft' || e.keyCode === 37) {
+        clearInterval(autoSlide); prevSlide();
+    }
+  });
+
+  // --- 6. OBSERVERS & SPARKLES ---
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting) {
+        if(entry.target.id === 'qualities') {
+           entry.target.querySelector('.card-container').classList.add('visible');
+           entry.target.querySelectorAll('.bar-fill').forEach(b => {
+             b.style.width = b.getAttribute('data-width');
+           });
+        }
+        if(entry.target.id === 'message') {
+           entry.target.querySelector('.message-box').classList.add('visible');
+        }
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => observer.observe(s));
+
+  const canvas = document.getElementById('sparkle-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  let particles = [];
+  function createSparkle() {
+    for(let i=0; i<5; i++) {
+      particles.push({
+        x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+        vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4,
+        life: 80+Math.random()*40, size: Math.random()*3
+      });
+    }
+  }
+  setInterval(createSparkle, 100);
+  function loop() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,i) => {
+      p.x += p.vx; p.y += p.vy; p.life--; p.opacity = p.life/100;
+      ctx.fillStyle = `rgba(212, 175, 55, ${p.opacity})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+      if(p.life<=0) particles.splice(i,1);
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+  window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
+</body>
+</html>
